@@ -101,6 +101,35 @@ namespace ControllerConnect
             return list;
         }
 
+        static readonly Dictionary<string, bool> questCache = new Dictionary<string, bool>();
+
+        /// <summary>
+        /// Connected Meta Quest headsets only. Emulators and phones are skipped, so the game is never
+        /// started on the wrong device. An unauthorized device cannot be asked what it is yet, so it
+        /// is kept (it is almost always the headset waiting for "Allow USB debugging").
+        /// </summary>
+        public static List<KeyValuePair<string, string>> Headsets()
+        {
+            var list = new List<KeyValuePair<string, string>>();
+            foreach (var d in Devices())
+            {
+                if (d.Key.StartsWith("emulator-")) continue;
+                if (d.Value == "device")
+                {
+                    bool quest;
+                    if (!questCache.TryGetValue(d.Key, out quest))
+                    {
+                        string who = (Shell(d.Key, "getprop ro.product.manufacturer") + " " + Shell(d.Key, "getprop ro.product.model")).ToLowerInvariant();
+                        quest = who.Contains("oculus") || who.Contains("meta") || who.Contains("quest");
+                        questCache[d.Key] = quest;
+                    }
+                    if (!quest) continue;
+                }
+                list.Add(d);
+            }
+            return list;
+        }
+
         public static string Shell(string serial, string cmd) { return Run("-s " + serial + " shell " + cmd, 15000).Trim(); }
 
         public static string InstalledVersion(string serial)

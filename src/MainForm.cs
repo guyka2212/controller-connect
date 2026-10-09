@@ -155,7 +155,7 @@ namespace ControllerConnect
                     });
                     return;
                 }
-                var devices = Adb.Devices();
+                var devices = Adb.Headsets();
                 string ready = null, state = null;
                 foreach (var d in devices) { state = d.Value; if (d.Value == "device") { ready = d.Key; break; } }
                 if (ready == null)
@@ -163,7 +163,7 @@ namespace ControllerConnect
                     serial = null; bridge.Serial = null; versionChecked = false;
                     string text = state == "unauthorized"
                         ? "Put the headset on and press Allow on \"Allow USB debugging\" (tick Always allow)."
-                        : devices.Count > 0 ? "The headset is connecting..." : "No headset found. Connect it with a USB-C cable and turn on developer mode.";
+                        : devices.Count > 0 ? "The headset is connecting..." : "No Quest found. Connect it with a USB-C cable and turn on developer mode.";
                     notReady = text;
                     Ui(delegate { SetStatus(headsetStatus, text, Warn); getAdb.Visible = false; SetStatus(gameStatus, "", Color.Black); });
                     return;
